@@ -3,7 +3,16 @@ HC05 = bluetooth('Tomografo',1);
 configureTerminator(HC05,"CR/LF");
 %configureCallback(HC05,"byte",4,@ParseBluetooth);
 %%
-N = 16; %Number of images to take
+Cam = CameraController;
+Cam.session.folder = 'D:\Tomografias\Test';
+Cam.camera.isonumber = 100;
+Cam.camera.fnumber = 10;
+Cam.camera.shutterspeed = 1/4;
+Cam.camera.compressionsetting = 'Large Fine JPEG';
+Cam.camera.drive_mode = 'Single-Frame Shooting';
+Cam.Capture();
+%%
+N = 64; %Number of images to take
 writeline(HC05, "RESET.");
 while(HC05.NumBytesAvailable < 4)
 end
@@ -22,7 +31,7 @@ for i = 1:N
     end
     msg = read(HC05,HC05.NumBytesAvailable,"char");
     if (startsWith(msg,"OK"))
-       TakePicture(i);
+        Cam.Capture() %capture (set custom filename)
     end
 end
 
@@ -30,8 +39,9 @@ end
 
 %% FUNCTIONS
 
-function TakePicture(ImgNumber)
-append("Taking picture " + num2str(ImgNumber))
+function TakePicture(Camera, ImgNumber)
+name = append("PIC_" + num2str(ImgNumber));
+Camera.Capture(append("PIC_" + num2str(ImgNumber))) %capture (set custom filename)
 pause(1)
 end
 
